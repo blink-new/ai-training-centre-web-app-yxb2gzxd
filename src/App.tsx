@@ -33,6 +33,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog'
 import { Input } from './components/ui/input'
 import { Textarea } from './components/ui/textarea'
+import { CourseDetailPage } from './components/CourseDetailPage'
+import { AILearningAssistant } from './components/AILearningAssistant'
 
 // Mock data
 const courses = [
@@ -477,6 +479,7 @@ recommendations = get_top_recommendations(user_id, similarity_matrix)`
 function CoursesPage() {
   const [selectedLevel, setSelectedLevel] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCourse, setSelectedCourse] = useState<number | null>(null)
 
   const filteredCourses = courses.filter(course => {
     const matchesLevel = selectedLevel === 'All' || course.level === selectedLevel
@@ -484,6 +487,15 @@ function CoursesPage() {
                          course.description.toLowerCase().includes(searchTerm.toLowerCase())
     return matchesLevel && matchesSearch
   })
+
+  if (selectedCourse) {
+    return (
+      <CourseDetailPage 
+        courseId={selectedCourse} 
+        onBack={() => setSelectedCourse(null)} 
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -589,12 +601,13 @@ function CoursesPage() {
                   </div>
 
                   <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                        {course.progress > 0 ? 'Continue Course' : 'Start Course'}
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
+                    <Button 
+                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                      onClick={() => setSelectedCourse(course.id)}
+                    >
+                      {course.progress > 0 ? 'Continue Course' : 'Start Course'}
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle className="flex items-center gap-3">
@@ -735,36 +748,15 @@ function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* AI Mentor Chat */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  AI Learning Assistant
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-indigo-100 text-indigo-600">AI</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-700">
-                        Great progress on your Computer Vision course! Ready to tackle object detection next? 
-                        I can help you understand the concepts better.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Input placeholder="Ask your AI mentor anything..." className="flex-1" />
-                  <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                    Send
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* AI Learning Assistant */}
+            <div className="max-w-4xl">
+              <AILearningAssistant 
+                context="Dashboard - Computer Vision course progress"
+                onSuggestionClick={(suggestion) => {
+                  console.log('Dashboard suggestion:', suggestion)
+                }}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="courses" className="space-y-6">
